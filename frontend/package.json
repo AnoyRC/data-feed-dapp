@@ -34,5 +34,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@project-serum/anchor": "^0.26.0",
+    "@solana/web3.js": "^1.73.0"
   }
 }
