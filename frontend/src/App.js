@@ -4,7 +4,13 @@ import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import { AnchorProvider} from "@project-serum/anchor";
 import { Buffer} from "buffer";
 import { OCR2Feed } from "@chainlink/solana-sdk";
+import CanvasJSReact from './canvasjs.react';
+var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 window.Buffer = Buffer;
+
+var dps = [];  
+var xVal = dps.length + 1;
+var yVal = 15;
 
 const CHAINLINK_FEED = "EpFp9mhi9cvZL9Lp59S1mt2twv2dtZGgFUvZEQMZ9Ra8"
 const CHAINLINK_PROGRAM_ID = "cjg3oHmg9uuPsP8D6g29NWvhySJkdYdAo9D25PRbKXJ"
@@ -15,12 +21,23 @@ const opts = {
   preFlightCommitment: 'processed'
 }
 
+const options = {
+  title :{
+    text: "Dynamic Line Chart"
+  },
+  data: [{
+    type: "line",
+    dataPoints : dps
+  }]
+}
+
 const App = () => {
   const delay = ms => new Promise(
     resolve => setTimeout(resolve, ms)
   );
 
   const [walletAddress, setWalletAddress] = useState(null);
+  const [update,setUpdate] = useState(false);
 
 
   const checkIfWalletIsConnected = async () => {
@@ -64,16 +81,25 @@ const App = () => {
 
   async function getFeed(){
     await delay(1000)
+    setUpdate(true);
     const provider = getProvider();
     const feedAddress = new PublicKey(CHAINLINK_FEED);
     
     let dataFeed = await OCR2Feed.load(CHAINLINK_PROGRAM_ID,provider);
 
     dataFeed.onRound(feedAddress, (event) => {
-      console.log(event.answer.toNumber()/100000000)
+      yVal = event.answer.toNumber()/100000000
     })
-
+    console.log(yVal)
+    dps.push({x: xVal, y: yVal})
+    xVal++;
+    if (dps.length > 10 ) {
+			dps.shift();
+		}
+    setUpdate(false)
     await new Promise(getFeed)
+
+    
   }
 
 
@@ -84,8 +110,9 @@ const App = () => {
 
   const renderConnectedContainer = () => {
     return <div>
-        
-      </div>
+      {update && <CanvasJSChart options = {options} />}
+      {!update && <CanvasJSChart options = {options} />}
+    </div>
   }
 
   useEffect(()=>{
@@ -95,6 +122,7 @@ const App = () => {
     window.addEventListener('load', onLoad);
     return () => window.removeEventListener('load', onLoad)
   },[])
+
 
   return (
     <div>
