@@ -10,7 +10,7 @@ window.Buffer = Buffer;
 
 var dps = [];  
 var xVal = dps.length + 1;
-var yVal = 15;
+var yVal = 0;
 
 const CHAINLINK_FEED = "EpFp9mhi9cvZL9Lp59S1mt2twv2dtZGgFUvZEQMZ9Ra8"
 const CHAINLINK_PROGRAM_ID = "cjg3oHmg9uuPsP8D6g29NWvhySJkdYdAo9D25PRbKXJ"
@@ -23,7 +23,7 @@ const opts = {
 
 const options = {
   title :{
-    text: "Dynamic Line Chart"
+    text: ""
   },
   data: [{
     type: "line",
@@ -90,7 +90,7 @@ const App = () => {
     dataFeed.onRound(feedAddress, (event) => {
       yVal = event.answer.toNumber()/100000000
     })
-    console.log(yVal)
+
     dps.push({x: xVal, y: yVal})
     xVal++;
     if (dps.length > 10 ) {
@@ -98,20 +98,27 @@ const App = () => {
 		}
     setUpdate(false)
     await new Promise(getFeed)
-
-    
   }
 
 
 
   const renderNotConnectedContainer = () => {
-    return <button onClick={connectWallet}> Connect Wallet </button>
+    return <div className="bg-zinc-700 h-screen w-screen flex flex-col justify-center">
+      <h1 className=" text-amber-50 self-center text-center mb-5 text-2xl">SOL/USD Live Feed <br /> Just Connect your wallet :)</h1>
+      <button className="bg-teal-500 rounded-md text-amber-50 h-10 w-40 self-center" onClick={connectWallet}> Connect Wallet </button>
+      </div>
   }
 
   const renderConnectedContainer = () => {
-    return <div>
-      {update && <CanvasJSChart options = {options} />}
-      {!update && <CanvasJSChart options = {options} />}
+    return <div className="bg-zinc-700 h-screen w-screen flex flex-col justify-center">
+      <h1 className=" text-amber-50 self-center text-center mb-5 text-2xl">SOL/USD Live Feed</h1>
+      <div className="bg-slate-500 rounded-2xl w-4/6 h-3/6 self-center flex flex-col justify-center">
+        <div className="self-center w-11/12 h-10/12">
+          {update && yVal!==0 && <CanvasJSChart options = {options} />}
+          {!update && yVal!==0 && <CanvasJSChart options = {options} />}
+        </div>
+      </div>
+      <h1 className=" text-amber-50 self-center text-center mb-5 text-2xl mt-5"> {yVal === 0 ? 'Initializing...' : `1 SOL = ${yVal} USD`}</h1>
     </div>
   }
 
